@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Stock Price Dashboard</title>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"
+      integrity="sha512-ZtnWehSfS27yEKPOMyGn+4qu2Dhro3qZtRMg+1YdJHnRwS50h5+xEkLp89aPPeX9xJ5slFcZ+ggftmeAqxvbw=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+  </head>
+
+  <body>
+    <h1>Stock Price Dashboard</h1>
+    <form>
+      <label for="apikey">API Key:</label>
+      <input type="text" id="apikey" name="apikey" required /><br />
+      <label for="symbol">Stock Symbol:</label>
+      <select id="symbol" name="symbol">
+        <option value="AAPL">AAPL</option>
+        <option value="GOOGL">GOOGL</option>
+        <option value="AMZN">AMZN</option>
+        <option value="FB">FB</option>
+        <option value="TSLA">TSLA</option>
+      </select>
+      <br />
+      <button type="button" onclick="getStockData()">Get Stock Data</button>
+    </form>
+    <canvas id="myChart" width="400" height="400"></canvas>
+    <script>
+      function getStockData() {
+        const apikey = document.getElementById("apikey").value;
+        const symbol = document.getElementById("symbol").value;
+        const apiUrl = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=${symbol}&apikey=GBJVK0QVDFQ0P7H2`;
+        fetch(apiUrl)
+          .then((response) => response.json())
+          .then((data) => {
+            const timeSeries = data["Time Series (Daily)"];
+            const dates = Object.keys(timeSeries);
+            const closingPrices = dates.map(
+              (date) => parseFloat(timeSeries[date]["4. close"])
+            );
+            const chartData = {
+              labels: dates,
+              datasets: [
+                {
+                  label: `${symbol} Closing Prices`,
+                  data: closingPrices,
+                  fill: false,
+                  borderColor: "rgb(75, 192, 192)",
+                  tension: 0.1,
+                },
+              ],
+            };
+            const ctx = document.getElementById("myChart").getContext("2d");
+            const myChart = new Chart(ctx, {
+              type: "line",
+              data: chartData,
+              options: {},
+            });
+          })
+          .catch((error) => {
+            console.error(error);
+          });
+      }
+    </script>
+  </body>
+</html>
+
